@@ -1,51 +1,30 @@
-# 💭 Reflection: Game Glitch Investigator
+# Reflection: Game Glitch Investigator
 
-Answer each question in 3 to 5 sentences. Be specific and honest about what actually happened while you worked. This is about your process, not trying to sound perfect.
+## 1. What was broken when I started?
 
-## 1. What was broken when you started?
+I checked the game in Normal and Easy modes using the debug panel to see the secret. Several hints pointed in the wrong direction, and Easy accepted numbers outside its range. Blank input and abc showed errors but still used attempts. New Game also kept the previous input and won status, so the next round could not be played properly.
 
-- What did the game look like the first time you ran it?
-- List at least two concrete bugs you noticed at the start  
-  (for example: "the hints were backwards").
+| Input or action | Expected behavior | Original behavior | Visible message |
+|---|---|---|---|
+| Normal: 45, secret 53 | Higher | Lower | Go LOWER |
+| Normal: 100, secret 53 | Accept and say Lower | Accepted and said Lower | Correct visible hint; 100 is a valid endpoint |
+| Easy: 99 | Reject without an attempt | Accepted and used an attempt | Go HIGHER |
+| Easy: blank | Ask for input without an attempt | Used an attempt and added blank history | Enter a guess |
+| Easy: 17.5, secret 17 | Reject decimal | Converted to 17 and won | Correct |
+| New Game after winning | Start a playable fresh round | Old won status and input remained | You already won |
 
-**Bug Reproduction Log**
+## 2. How did I use AI as a teammate?
 
-Document at least 3 bugs you found. Add rows as needed.
+I used ChatGPT/Codex to discuss the screenshots and then asked it to fix the code and document the results. The suggestion to keep round state in Streamlit session state and reset it through callbacks was useful; automated interface tests verified the reset. I corrected the interpretation of the 100 test because Normal mode includes both 1 and 100, and its visible Lower hint was correct for secret 53. The final tests check inclusive boundaries instead of treating 100 as invalid in Normal mode.
 
-| Input | Expected Behavior | Actual Behavior | Console Output / Error |
-|-------|-------------------|-----------------|------------------------|
-| | | | |
-| | | | |
-| | | | |
+## 3. Debugging and testing the fixes
 
----
+I used known secrets from the debug panel to compare the expected hint with the displayed hint. I asked Codex to add and run pytest tests for those examples and for invalid input, scoring, and round resets. All 64 tests passed, including Streamlit interface tests that submit guesses, change difficulty, and restart after winning or losing. The screenshots record the original bugs; I have not supplied new manual screenshots of the fixed version.
 
-## 2. How did you use AI as a teammate?
+## 4. What did I learn about Streamlit and state?
 
-- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
-- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
-- Give one example of an AI suggestion you did not accept as written (including what the AI suggested, why you rejected or changed it, and how you verified your version). It does not have to be a suggestion that was wrong: over-engineered, out of scope, harder to read, or a poor fit for this codebase all count.
+Streamlit runs the script again when a player uses a widget. Session state remembers the round between these reruns, so the secret does not need to be generated again for every guess. A new round must reset all related values, including the input, history, message, attempts, score, and status. Callbacks update those values before the screen is drawn, which helps avoid old values appearing on screen.
 
----
+## 5. Looking ahead: developer habits
 
-## 3. Debugging and testing your fixes
-
-- How did you decide whether a bug was really fixed?
-- Describe at least one test you ran (manual or using pytest)  
-  and what it showed you about your code.
-- Did AI help you design or understand any tests? How?
-
----
-
-## 4. What did you learn about Streamlit and state?
-
-- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
-
----
-
-## 5. Looking ahead: your developer habits
-
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-- What is one thing you would do differently next time you work with AI on a coding task?
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
+I want to keep testing the smallest and largest allowed values, invalid text, and the New Game button. Next time, I will record the mode, secret, input, expected result, and actual result together before asking AI for a fix. I will also check an AI explanation against the code and screenshots rather than accepting it immediately. This project showed me that AI-generated code needs tests for the whole player flow as well as individual functions.
