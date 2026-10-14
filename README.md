@@ -74,6 +74,10 @@ python -m streamlit run app.py
 
 Use Python 3.10 or newer. A virtual environment is recommended.
 
+## Presentation
+
+[View the Game Glitch Investigator presentation](https://docs.google.com/presentation/d/e/2PACX-1vTbQQbH6i43hulSoYerhiv_euZEdlUG9NhHCTl1N8MIvSnDNJdwsh1zSqIsRbPgl5v6u0maP5XDCVM2/pub?start=true&loop=true&delayms=3000)
+
 ## Demo walkthrough
 
 1. Run the app and choose **Normal**. It starts with eight attempts and accepts numbers from 1 to 100, inclusive.
